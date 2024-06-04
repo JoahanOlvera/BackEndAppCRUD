@@ -69,7 +69,7 @@
     <v-card>
       <v-card-title>Actualizar Responsable Por ID</v-card-title>
       <v-card-text>
-        <v-text-field v-model="responsableAActualizar.id" label="ID"></v-text-field>
+        <v-text-field v-model="responsableAActualizar.id" label="ID" @change="cargarDatosResponsable"></v-text-field>
         <v-text-field v-model="responsableAActualizar.numeroEmpleado" label="Numero de empleado del responsable"></v-text-field>
         <v-text-field v-model="responsableAActualizar.nombre" label="Nombre del responsable"></v-text-field>
         <v-file-input
@@ -209,6 +209,31 @@ export default {
           throw new Error('Error al actualizar al responsable');
         }
         this.getResponsables();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    },
+    async cargarDatosResponsable() {
+      if (!this.responsableAActualizar.id) {
+        return;
+      }
+      try {
+        const response = await fetch(`https://localhost:4000/responsables/buscarPorId/${this.responsableAActualizar.id}`, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'same-origin'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.responsableAActualizar = {
+            id: data.id,
+            numeroEmpleado: data.numeroEmpleado,
+            nombre: data.nombre,
+            imagenBase64: data.imagenBase64
+          };
+        } else {
+          throw new Error('Responsable no encontrado');
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }

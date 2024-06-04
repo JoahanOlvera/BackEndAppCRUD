@@ -27,7 +27,7 @@
     <v-btn @click="abrirDialogoAgregarUbicacion">Añadir ubicación</v-btn>
     <v-btn @click="abrirDialogoEliminarUbicacion">Borrar ubicación</v-btn>
     <v-btn @click="abrirDialogoActualizarUbicacion">Actualizar ubicación</v-btn>
-    <v-btn @click="getUbicaciones">Recargar ubicaciones</v-btn> <!-- Botón para recargar ubicaciones -->
+    <v-btn @click="getUbicaciones">Recargar ubicaciones</v-btn>
   </v-container>
 
   <v-dialog v-model="dialogAgregarUbicacion" max-width="500">
@@ -68,7 +68,7 @@
     <v-card>
       <v-card-title>Actualizar Ubicación Por ID</v-card-title>
       <v-card-text>
-        <v-text-field v-model="ubicacionAActualizar.id" label="ID"></v-text-field>
+        <v-text-field v-model="ubicacionAActualizar.id" label="ID" @change="cargarDatosUbicacion"></v-text-field>
         <v-text-field v-model="ubicacionAActualizar.descripcion" label="Descripción"></v-text-field>
         <v-file-input
           v-model="ubicacionAActualizar.imagen"
@@ -97,7 +97,7 @@ export default {
         { text: 'ID', value: 'id' },
         { text: 'Descripción', value: 'descripcion' },
         { text: 'Activos', value: 'activos', align: 'left', sortable: false },
-        { text: 'Imagen', value: 'imagenBase64' }, // Asegúrate de que el valor coincide con el campo en el backend
+        { text: 'Imagen', value: 'imagenBase64' },
       ],
       dialogAgregarUbicacion: false,
       dialogBorrarUbicacion: false,
@@ -105,7 +105,7 @@ export default {
       nuevaUbicacion: {
         id: '',
         descripcion: '',
-        imagenBase64: '' // Asegúrate de que esta propiedad está definida
+        imagenBase64: ''
       },
       ubicacionABorrar: {
         id: ''
@@ -113,7 +113,7 @@ export default {
       ubicacionAActualizar: {
         id: '',
         descripcion: '',
-        imagenBase64: '' // Asegúrate de que esta propiedad está definida
+        imagenBase64: ''
       }
     };
   },
@@ -206,12 +206,36 @@ export default {
         console.error('Error fetching data:', error);
       }
     },
+    async cargarDatosUbicacion() {
+      if (!this.ubicacionAActualizar.id) {
+        return;
+      }
+      try {
+        const response = await fetch(`https://localhost:4000/ubicaciones/buscarPorId/${this.ubicacionAActualizar.id}`, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'same-origin'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.ubicacionAActualizar = {
+            id: data.id,
+            descripcion: data.descripcion,
+            imagenBase64: data.imagenBase64
+          };
+        } else {
+          throw new Error('Ubicación no encontrada');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    },
     handleImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          const base64 = e.target.result.split(',')[1]; // Solo la parte base64
+          const base64 = e.target.result.split(',')[1];
           if (this.dialogAgregarUbicacion) {
             this.nuevaUbicacion.imagenBase64 = base64;
           } else if (this.dialogActualizarUbicacion) {

@@ -29,8 +29,8 @@
       <v-card-title>Añadir Nuevo Activo</v-card-title>
       <v-card-text>
         <v-text-field v-model="nuevoActivo.id" label="ID"></v-text-field>
-        <v-text-field v-model="nuevoActivo.numeroSerie" label="Numero de serie"></v-text-field>
-        <v-text-field v-model="nuevoActivo.numeroInventario" label="Numero de inventario"></v-text-field>
+        <v-text-field v-model="nuevoActivo.numeroDeSerie" label="Numero de serie"></v-text-field>
+        <v-text-field v-model="nuevoActivo.numeroDeInventario" label="Numero de inventario"></v-text-field>
         <v-text-field v-model="nuevoActivo.tipo" label="Tipo"></v-text-field>
         <v-text-field v-model="nuevoActivo.descripcion" label="Descripcion"></v-text-field>
         <v-text-field v-model="nuevoActivo.ubicacionId" label="Id de ubicación" type="number"></v-text-field>
@@ -67,9 +67,9 @@
     <v-card>
       <v-card-title>Actualizar Activo Por ID</v-card-title>
       <v-card-text>
-        <v-text-field v-model="activoAActualizar.id" label="ID"></v-text-field>
-        <v-text-field v-model="activoAActualizar.numeroSerie" label="Numero de serie"></v-text-field>
-        <v-text-field v-model="activoAActualizar.numeroInventario" label="Numero de inventario"></v-text-field>
+        <v-text-field v-model="activoAActualizar.id" label="ID" @change="cargarDatosActivo"></v-text-field>
+        <v-text-field v-model="activoAActualizar.numeroDeSerie" label="Numero de serie"></v-text-field>
+        <v-text-field v-model="activoAActualizar.numeroDeInventario" label="Numero de inventario"></v-text-field>
         <v-text-field v-model="activoAActualizar.tipo" label="Tipo"></v-text-field>
         <v-text-field v-model="activoAActualizar.descripcion" label="Descripcion"></v-text-field>
         <v-text-field v-model="activoAActualizar.ubicacionId" label="Id de ubicación" type="number"></v-text-field>
@@ -99,8 +99,8 @@ export default {
       dataItems: [],
       headers: [
         { text: 'ID', value: 'id' },
-        { text: 'Numero de serie', value: 'numeroSerie' },
-        { text: 'Numero de inventario', value: 'numeroInventario' },
+        { text: 'Numero de serie', value: 'numeroDeSerie' },
+        { text: 'Numero de inventario', value: 'numeroDeInventario' },
         { text: 'Tipo', value: 'tipo' },
         { text: 'Descripcion', value: 'descripcion' },
         { text: 'Id de ubicacion', value: 'ubicacionId' },
@@ -112,8 +112,8 @@ export default {
       dialogActualizarActivo: false,
       nuevoActivo: {
         id: '',
-        numeroSerie: '',
-        numeroInventario: '',
+        numeroDeSerie: '',
+        numeroDeInventario: '',
         tipo: '',
         descripcion: '',
         ubicacionId: '',
@@ -125,8 +125,8 @@ export default {
       },
       activoAActualizar: {
         id: '',
-        numeroSerie: '',
-        numeroInventario: '',
+        numeroDeSerie: '',
+        numeroDeInventario: '',
         tipo: '',
         descripcion: '',
         ubicacionId: '',
@@ -180,8 +180,8 @@ export default {
           },
           body: JSON.stringify({
             id: this.nuevoActivo.id,
-            numeroSerie: this.nuevoActivo.numeroSerie,
-            numeroInventario: this.nuevoActivo.numeroInventario,
+            numeroSerie: this.nuevoActivo.numeroDeSerie,
+            numeroInventario: this.nuevoActivo.numeroDeInventario,
             tipo: this.nuevoActivo.tipo,
             descripcion: this.nuevoActivo.descripcion,
             ubicacionId: this.nuevoActivo.ubicacionId || null,
@@ -217,8 +217,8 @@ export default {
             'Content-Type': 'application/json' // Indica que estás enviando datos en formato JSON
           },
           body: JSON.stringify({
-            numeroSerie: this.activoAActualizar.numeroSerie,
-            numeroInventario: this.activoAActualizar.numeroInventario,
+            numeroSerie: this.activoAActualizar.numeroDeSerie,
+            numeroInventario: this.activoAActualizar.numeroDeInventario,
             tipo: this.activoAActualizar.tipo,
             descripcion: this.activoAActualizar.descripcion,
             ubicacionId: this.activoAActualizar.ubicacionId || null,
@@ -231,6 +231,35 @@ export default {
           throw new Error('Error al actualizar el activo');
         }
         this.getActivos();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    },
+    async cargarDatosActivo() {
+      if (!this.activoAActualizar.id) {
+        return;
+      }
+      try {
+        const response = await fetch(`https://localhost:4000/activos/buscarPorId/${this.activoAActualizar.id}`, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'same-origin'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.activoAActualizar = {
+            id: data.id,
+            numeroDeSerie: data.numeroDeSerie,
+            numeroDeInventario: data.numeroDeInventario,
+            tipo: data.tipo,
+            descripcion: data.descripcion,
+            ubicacionId: data.ubicacionId,
+            responsableId: data.responsableId,
+            imagenBase64: data.imagenBase64
+          };
+        } else {
+          throw new Error('Activo no encontrado');
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
