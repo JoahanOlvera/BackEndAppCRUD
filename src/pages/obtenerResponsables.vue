@@ -158,29 +158,29 @@ export default {
       }
     },
     async agregarResponsable() {
-      try {
-        const response = await fetch(`https://localhost:4000/responsables`, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            id: this.nuevoResponsable.id,
-            numeroEmpleado: this.nuevoResponsable.numeroEmpleado,
-            nombre: this.nuevoResponsable.nombre,
-            imagenBase64: this.nuevoResponsable.imagenBase64
-          }),
-          credentials: 'same-origin',
-        });
-        if (!response.ok) {
-          throw new Error('Error al agregar al responsable');
-        }
-        this.getResponsables();
-      } catch (error) {
-        console.error('Error fetching data:', error);
+    try {
+      const response = await fetch(`https://localhost:4000/responsables`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: this.nuevoResponsable.id,
+          numeroEmpleado: this.nuevoResponsable.numeroEmpleado,
+          nombre: this.nuevoResponsable.nombre,
+          imagenBase64: this.nuevoResponsable.imagenBase64
+        }),
+        credentials: 'same-origin',
+      });
+      if (!response.ok) {
+        throw new Error('Error al agregar al responsable');
       }
-    },
+      this.getResponsables();
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  },
     async actualizarResponsable(id) {
       try {
         const existe = await fetch(`https://localhost:4000/responsables/buscarPorId/${id}`, {
@@ -239,20 +239,20 @@ export default {
       }
     },
     handleImageUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64 = e.target.result.split(',')[1];
-          if (this.dialogAgregarResponsable) {
-            this.nuevoResponsable.imagenBase64 = base64;
-          } else if (this.dialogActualizarResponsable) {
-            this.responsableAActualizar.imagenBase64 = base64;
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    },
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64 = e.target.result.split(',')[1];
+        if (this.dialogAgregarResponsable) {
+          this.nuevoResponsable.imagenBase64 = base64;
+        } else if (this.dialogActualizarResponsable) {
+          this.responsableAActualizar.imagenBase64 = base64;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  },
     abrirDialogoAgregarResponsable() {
       this.dialogAgregarResponsable = true;
     },
